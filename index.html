@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Nerd Ratings</title>
+<meta name="description" content="Computer ratings and daily predictions for every Division I men's college basketball game, with an honest, graded track record.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="wordmark" href="#/games">The Nerd Ratings</a>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#/games" data-view="games">Games</a>
+    <a href="#/ratings" data-view="ratings">Ratings</a>
+    <a href="#/record" data-view="record">Record</a>
+    <a href="#/about" data-view="about">How it works</a>
+  </nav>
+</header>
+
+<main id="main" tabindex="-1">
+  <p class="status" id="status">Loading today's games…</p>
+
+  <!-- Games -->
+  <section id="view-games" class="view" hidden>
+    <div class="dayhead">
+      <h1 id="day-title"></h1>
+      <p id="day-summary" class="lede"></p>
+    </div>
+    <nav class="datestrip" aria-label="Choose a date">
+      <button type="button" class="step" id="day-prev" aria-label="Earlier dates">‹</button>
+      <ol id="day-list"></ol>
+      <button type="button" class="step" id="day-next" aria-label="Later dates">›</button>
+    </nav>
+    <p class="notice" id="early-notice" hidden></p>
+    <div class="controls">
+      <label class="field"><span>Team</span><input id="g-q" type="search" placeholder="Search a team" autocomplete="off"></label>
+      <label class="field"><span>Conference</span><select id="g-conf"><option value="">All</option></select></label>
+      <label class="check"><input id="g-edge" type="checkbox"> Only edges of 4+ points</label>
+      <div class="seg" role="group" aria-label="Sort games">
+        <button type="button" data-sort="time" aria-pressed="true">By time</button>
+        <button type="button" data-sort="edge" aria-pressed="false">By edge</button>
+      </div>
+    </div>
+    <div class="sheet">
+      <div class="g-head" aria-hidden="true">
+        <span>Time (ET)</span><span>Team</span><span class="n">Win</span><span class="n">Model</span><span class="n">Market</span><span id="g-last-head">Edge</span>
+      </div>
+      <ol id="games" class="games"></ol>
+      <p id="games-empty" class="empty" hidden></p>
+    </div>
+  </section>
+
+  <!-- Ratings -->
+  <section id="view-ratings" class="view" hidden>
+    <div class="dayhead">
+      <h1>Team ratings</h1>
+      <p class="lede" id="ratings-summary"></p>
+    </div>
+    <div class="controls">
+      <label class="field"><span>Team</span><input id="r-q" type="search" placeholder="Search a team" autocomplete="off"></label>
+      <label class="field"><span>Conference</span><select id="r-conf"><option value="">All</option></select></label>
+    </div>
+    <div class="sheet">
+      <table class="ratings">
+        <thead><tr>
+          <th scope="col" class="n">Rank</th><th scope="col" class="n chg">Week</th><th scope="col">Team</th>
+          <th scope="col" class="conf">Conference</th><th scope="col" class="n">Record</th>
+          <th scope="col" class="n">Rating</th><th scope="col" class="barcol"><span class="sr">Rating chart</span></th>
+        </tr></thead>
+        <tbody id="ratings"></tbody>
+      </table>
+      <p id="ratings-empty" class="empty" hidden></p>
+    </div>
+  </section>
+
+  <!-- Record -->
+  <section id="view-record" class="view" hidden>
+    <div class="dayhead">
+      <h1>Track record</h1>
+      <p class="lede" id="record-lede"></p>
+    </div>
+    <dl class="stats" id="record-stats"></dl>
+    <div class="sheet chart-sheet">
+      <h2 class="h2">Winners picked, day by day</h2>
+      <div id="record-chart" class="chart"></div>
+    </div>
+    <div class="sheet">
+      <table class="days">
+        <thead><tr><th scope="col">Date</th><th scope="col" class="n">Games</th><th scope="col" class="n">Winners</th><th scope="col" class="n">Against the spread</th></tr></thead>
+        <tbody id="record-days"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="view-about" class="view prose" hidden>
+    <h1>How it works</h1>
+    <p>Every Division I team gets one number: how many points better or worse it is than an average team on a neutral court. A team with a rating of +20 should beat a +5 team by about 15.</p>
+    <p>The ratings come from a PageRank-style model, the same idea Google used to rank web pages. Every game splits a vote between the two teams. The winner's share grows with the square root of the margin, after taking out home court, so a 20-point win counts for more than a 5-point win but not four times as much. Margins are capped at 50, so running up the score doesn't pay.</p>
+    <p>Beating a good team is worth more than beating a bad one, because good teams have more rating to pass along. The whole season is re-solved from scratch every morning.</p>
+    <h2>Turning ratings into a line</h2>
+    <ul>
+      <li>Rating gap between the two teams, in points</li>
+      <li>Plus <span id="a-home">3</span> points for the home team</li>
+      <li>Plus a small travel adjustment for long road trips</li>
+    </ul>
+    <p>Win probability assumes the final margin lands within a normal spread of about <span id="a-sigma">11.8</span> points around the prediction, which is how far off a typical game finishes.</p>
+    <h2>Reading the games page</h2>
+    <p><strong>Model</strong> is the predicted spread. <strong>Market</strong> is the betting line when one is posted. <strong>Edge</strong> is the gap between the two, and the highlighted team is the side the model prefers against that line.</p>
+    <p>Predictions are made each morning before tip-off and are never revised after the fact. Every graded result on the Record page comes from that morning's numbers.</p>
+    <p class="fine">For fun and analysis. Not betting advice.</p>
+  </section>
+</main>
+
+<footer class="foot">
+  <p id="updated"></p>
+</footer>
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<script src="assets/app.js" defer></script>
+</body>
+</html>

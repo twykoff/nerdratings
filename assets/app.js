@@ -11,7 +11,7 @@
     index: null, ratings: null, days: {}, v: "",
     view: "games", date: null,
     q: "", conf: "", edgeOnly: false, sort: "time",
-    rq: "", rconf: "", swiped: false,
+    rq: "", rconf: "", swiped: false, noPicks: false,
   };
 
   // ------------------------------------------------------------------ formatting
@@ -47,7 +47,7 @@
 
   // ------------------------------------------------------------------ game math
   function derive(g) {
-    const hasLine = g.line != null;
+    const hasLine = g.line != null && !S.noPicks;
     const edge = hasLine ? Math.round((g.margin + g.line) * 10) / 10 : null;
     const side = hasLine && edge !== 0 ? (edge > 0 ? "home" : "away") : null;
     const favored = g.margin > 0 ? "home" : g.margin < 0 ? "away" : null;
@@ -126,6 +126,8 @@
       last = `<div class="g-edge g-result" data-label="Final">` +
         `<div class="scorebox"><span class="${hw ? "" : "final"}">${g.final.away}</span><span class="${hw ? "final" : ""}">${g.final.home}</span></div>` +
         `<div class="grade">${su}${ats}</div></div>`;
+    } else if (S.noPicks) {
+      last = `<div class="g-edge noline"><span class="sub">No pick yet</span></div>`;
     } else if (d.hasLine && d.side) {
       const w = Math.min(d.absEdge, 15) / 15 * 100;
       last = `<div class="g-edge"><span class="pick">${esc(g[d.side].name)} ${spread(sideLine(g, d.side))}</span>` +
@@ -143,13 +145,19 @@
       `<div class="g-teams">${teamLine(g, "away", d, "")}${teamLine(g, "home", d, at)}</div>` +
       `<div class="g-col g-win" data-label="Win"><span class="${favCls("away")}">${winTxt(pa)}</span><span class="${favCls("home")}">${winTxt(g.p_home)}</span></div>` +
       `<div class="g-col g-model" data-label="Model"><span class="${favCls("away")}">${spread(g.margin)}</span><span class="${favCls("home")}">${spread(-g.margin)}</span></div>` +
-      `<div class="g-col g-market" data-label="Market"><span class="dim">${d.hasLine ? spread(-g.line) : "—"}</span><span class="dim">${d.hasLine ? spread(g.line) : "—"}</span></div>` +
+      `<div class="g-col g-market" data-label="Market"><span class="dim">${g.line != null ? spread(-g.line) : "—"}</span><span class="dim">${g.line != null ? spread(g.line) : "—"}</span></div>` +
       last + `</li>`;
   }
 
   function daySummary(day) {
     const gs = day.games;
     if (!gs.length) return "No Division I games on this date.";
+    if (S.noPicks) {
+      const fin = gs.filter((g) => g.final).length;
+      return fin
+        ? `${gs.length} games. These were played before the ratings formed, so they don't count toward the record.`
+        : `${gs.length} game${gs.length > 1 ? "s" : ""}. No picks yet: every team starts even until it has played a couple of games.`;
+    }
     const graded = gs.filter((g) => g.final);
     if (graded.length) {
       const su = graded.filter((g) => g.su === 1).length, suN = graded.filter((g) => g.su != null).length;
@@ -176,11 +184,15 @@
     $("#status").hidden = true;
     let day;
     try { day = await loadDay(S.date); } catch (e) { day = { games: [] }; }
+    S.noPicks = day.ratings_ready === false;
+    $("#view-games .check").hidden = S.noPicks;
+    $("#view-games .seg").hidden = S.noPicks;
+    if (S.noPicks) { S.edgeOnly = false; S.sort = "time"; $("#g-edge").checked = false; }
 
     const early = S.index.early_season && S.date >= S.index.today;
     $("#early-notice").hidden = !early;
     if (early) $("#early-notice").textContent = S.index.avg_games < 1
-      ? "The season hasn't tipped off yet, so every team starts even and these lines are home court only. Ratings form after opening week and sharpen through December."
+      ? `Every team starts even, so for now the model's line is just home court. Picks against the spread start once teams have played about ${S.index.picks_min_games || 2} games each, and the ratings sharpen through December.`
       : `Ratings are still settling. Teams have played ${S.index.avg_games} games on average, so these numbers lean heavily on home court and will sharpen over the next few weeks.`;
 
     $("#day-summary").innerHTML = daySummary(day);

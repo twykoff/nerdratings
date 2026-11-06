@@ -293,3 +293,19 @@ th:first-child, td:first-child { padding-left: 0; }
   .stats div { border-right: 0; border-bottom: 1px solid var(--rule); }
   .lede { font-size: 17px; }
 }
+
+/* ---------- injury report ---------- */
+.inj { margin-top: 5px; font-size: 13px; line-height: 1.35; }
+.inj summary { cursor: pointer; color: var(--ink-2); list-style: none; display: inline-flex; gap: 6px; }
+.inj summary::-webkit-details-marker { display: none; }
+.inj summary::before { content: "+"; width: 0.8em; font-weight: 700; color: var(--ink); }
+.inj[open] summary::before { content: "\2212"; }
+.inj summary:hover { color: var(--ink); }
+.inj-team { margin-top: 6px; }
+.inj-team b { font-weight: 700; font-size: 13px; }
+.inj ul { list-style: none; margin: 2px 0 0; padding: 0; }
+.inj li { padding: 3px 0; }
+.inj-p { font-weight: 600; }
+.inj-s.out { color: var(--red); font-weight: 600; }
+.inj-pts { font-weight: 700; }
+.inj-note { display: block; color: var(--ink-2); font-size: 12px; max-width: 60ch; }

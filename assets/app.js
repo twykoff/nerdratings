@@ -111,6 +111,26 @@
       `${t.rank && S.index.avg_games >= 2 ? `<span class="rk" title="Rating rank">${t.rank}</span>` : ""}<span class="nm">${name}</span></div>`;
   }
 
+  function injBlock(g) {
+    const sides = ["away", "home"].filter((sd) => (g[sd].inj || []).length);
+    if (!sides.length) return "";
+    const n = sides.reduce((a, sd) => a + g[sd].inj.length, 0);
+    const moved = ["away", "home"].filter((sd) => g[sd].inj_pts > 0)
+      .map((sd) => `${esc(g[sd].name)} ${MINUS}${num1(g[sd].inj_pts)} pts`);
+    const sum = moved.length ? `Injuries: ${moved.join(", ")}`
+      : `Injuries (${n}), no change to the line`;
+    const list = sides.map((sd) => `<div class="inj-team"><b>${esc(g[sd].name)}</b><ul>` +
+      g[sd].inj.map((p) => {
+        const out = /^(out|susp)/i.test(p.status);
+        return `<li><span class="inj-p">${esc(p.name)}</span>${p.pos ? `, ${esc(p.pos)}` : ""}: ` +
+          `<span class="inj-s${out ? " out" : ""}">${esc(p.status)}</span>` +
+          `${p.injury ? ` (${esc(p.injury.toLowerCase())})` : ""}` +
+          `${p.pts > 0 ? ` <span class="inj-pts">${MINUS}${num1(p.pts)}</span>` : ""}` +
+          `${p.note ? `<span class="inj-note">${esc(p.note)}</span>` : ""}</li>`;
+      }).join("") + `</ul></div>`).join("");
+    return `<details class="inj"><summary>${sum}</summary>${list}</details>`;
+  }
+
   function gameRow(g) {
     const d = derive(g);
     const done = !!g.final;
@@ -142,7 +162,7 @@
     const site = g.neutral ? '<span class="site">Neutral site</span>' : "";
     return `<li class="game${done ? " done" : ""}">` +
       `<div class="g-time">${esc((g.time || "TBA").replace(/ ET$/, ""))}${site}</div>` +
-      `<div class="g-teams">${teamLine(g, "away", d, "")}${teamLine(g, "home", d, at)}</div>` +
+      `<div class="g-teams">${teamLine(g, "away", d, "")}${teamLine(g, "home", d, at)}${injBlock(g)}</div>` +
       `<div class="g-col g-win" data-label="Win"><span class="${favCls("away")}">${winTxt(pa)}</span><span class="${favCls("home")}">${winTxt(g.p_home)}</span></div>` +
       `<div class="g-col g-model" data-label="Model"><span class="${favCls("away")}">${spread(g.margin)}</span><span class="${favCls("home")}">${spread(-g.margin)}</span></div>` +
       `<div class="g-col g-market" data-label="Market"><span class="dim">${g.line != null ? spread(-g.line) : "—"}</span><span class="dim">${g.line != null ? spread(g.line) : "—"}</span></div>` +
@@ -192,7 +212,7 @@
     const early = S.index.early_season && S.date >= S.index.today;
     $("#early-notice").hidden = !early;
     if (early) $("#early-notice").textContent = S.index.avg_games < 1
-      ? `Every team starts even, so for now the model's line is just home court. Picks against the spread start once teams have played about ${S.index.picks_min_games || 2} games each, and the ratings sharpen through December.`
+      ? `Every team starts even, so for now the model's line is just home court and injuries. Picks against the spread start once teams have played about ${S.index.picks_min_games || 2} games each, and the ratings sharpen through December.`
       : `Ratings are still settling. Teams have played ${S.index.avg_games} games on average, so these numbers lean heavily on home court and will sharpen over the next few weeks.`;
 
     $("#day-summary").innerHTML = daySummary(day);

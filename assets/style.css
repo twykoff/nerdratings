@@ -295,17 +295,15 @@ th:first-child, td:first-child { padding-left: 0; }
 }
 
 /* ---------- injury report ---------- */
-.inj { margin-top: 5px; font-size: 13px; line-height: 1.35; }
-.inj summary { cursor: pointer; color: var(--ink-2); list-style: none; display: inline-flex; gap: 6px; }
-.inj summary::-webkit-details-marker { display: none; }
-.inj summary::before { content: "+"; width: 0.8em; font-weight: 700; color: var(--ink); }
-.inj[open] summary::before { content: "\2212"; }
-.inj summary:hover { color: var(--ink); }
-.inj-team { margin-top: 6px; }
-.inj-team b { font-weight: 700; font-size: 13px; }
-.inj ul { list-style: none; margin: 2px 0 0; padding: 0; }
-.inj li { padding: 3px 0; }
+.inj { grid-column: 2 / 6; margin-top: 7px; padding-top: 6px; border-top: 1px dashed var(--rule); font-size: 13px; line-height: 1.35; }
+@media (max-width: 760px) { .inj { grid-column: 1 / -1; } }
+.inj-team + .inj-team { margin-top: 5px; }
+.inj-tm { font-weight: 700; }
+.inj-sum { font-weight: 700; color: var(--red); }
+.inj-none { color: var(--ink-2); }
+.inj ul { list-style: none; margin: 2px 0 0; padding: 0 0 0 10px; }
+.inj li { padding: 2px 0; }
 .inj-p { font-weight: 600; }
 .inj-s.out { color: var(--red); font-weight: 600; }
 .inj-pts { font-weight: 700; }
-.inj-note { display: block; color: var(--ink-2); font-size: 12px; max-width: 60ch; }
+.inj-note { display: block; color: var(--ink-2); font-size: 12px; max-width: 64ch; }
